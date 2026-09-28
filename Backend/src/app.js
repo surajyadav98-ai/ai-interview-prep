@@ -4,10 +4,22 @@ const cors = require("cors")
 
 const app = express()
 
+app.set("trust proxy", 1)
 app.use(express.json())
 app.use(cookieParser())
+
+const allowedOrigins = [
+    "http://localhost:5173",
+    "https://ai-interview-prep-two-eta.vercel.app"
+]
+
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            return callback(null, true)
+        }
+        return callback(new Error("Not allowed by CORS"))
+    },
     credentials: true
 }))
 
@@ -18,6 +30,11 @@ const interviewRouter = require("./routes/interview.routes")
 
 /* using all the routes here */
 app.use("/api/auth", authRouter)
+app.use("/api/interview", interviewRouter)
+
+
+
+module.exports = app
 app.use("/api/interview", interviewRouter)
 
 
